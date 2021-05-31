@@ -1,0 +1,5 @@
+Include Background
+0. 0.599835
+
+Except Background
+0. 0.882094
