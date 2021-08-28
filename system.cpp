@@ -62,7 +62,7 @@ void System::Select()
 
 void System::RMSECalculate()
 {
-	std::stringstream errorFile;
+	std::stringstream errorFile; // error 텍스트 파일명
 
 	errorFile << "./errors/" << modelName << "(RMSE," << imageForCompare1 << "_vs_" << imageForCompare2 << ").txt";
 	TextFileInitialize(errorFile.str().c_str());
@@ -72,7 +72,7 @@ void System::RMSECalculate()
 void System::PrintPixelColorAndDiffernceInTextFile()
 {
 	int imageNumber;
-	std::stringstream errorFile;
+	std::stringstream errorFile; // error 텍스트 파일명
 
 	std::cout << "Choose Image Number: ";
 	std::cin >> imageNumber;
@@ -143,7 +143,10 @@ void System::ImageDataInitialize(int imageSize)
 {
 	sources.reserve(imageSize);
 	destinations.reserve(imageSize);
-
+	/*
+	이미지 불러오기
+	이미지 형식이 다를 경우 코드 변경 필요
+	*/
 	// 영현님께서 보내신 model과 내가 그린 image 파일 각각 불러오기
 	for (int i = 0; i < imageSize; ++i)
 	{
@@ -217,8 +220,8 @@ void System::Compare(int scale)
 				for (int channel = 0; channel < 3; channel++)
 				{
 					int imageDifference = cv::abs(sources[imageIndex].GetImageColorByPixel(row, col, channel) -
-						destinations[imageIndex].GetImageColorByPixel(row, col, channel));
-					results.SetImageColorByPixel(row, col, channel, cv::saturate_cast<uchar>(scale * imageDifference));
+						destinations[imageIndex].GetImageColorByPixel(row, col, channel)); // 픽셀마다 두 이미지의 차이의 절댓값을 구함
+					results.SetImageColorByPixel(row, col, channel, cv::saturate_cast<uchar>(scale * imageDifference)); // imageDiffernce 값을 Output image에 저장
 				}
 			}
 		}

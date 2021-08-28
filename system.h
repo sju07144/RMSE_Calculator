@@ -49,15 +49,14 @@ private:
 	void CreateErrorDirectory();
 	void CreateCompareDirectory();
 
-	void RMSECalculate();
-	void PrintPixelColorAndDiffernceInTextFile();
-	void CreateDiffernceImage();
+	void RMSECalculate(); // 픽셀마다 rmse 계산
+	void PrintPixelColorAndDiffernceInTextFile(); // error가 존재하는 pixel의 좌표값 조사
+	void CreateDiffernceImage(); // difference 이미지 생성
 
 	void TextFileInitialize(const char* fileName);
 	void ImageDataInitialize(int size);
 
 	void CalculateDirectionalLight();
-	void CalculateDirectionalLightForPython(int size);
 	void Compare(int scale);
 	void DiffernceCalculate(int i);
 
