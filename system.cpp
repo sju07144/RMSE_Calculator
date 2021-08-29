@@ -7,6 +7,10 @@ System::System()
 	imageForCompare1 = "";
 	imageForCompare2 = "";
 
+	imageToFileFormats.insert({ "ground_truth", ".input.png" });
+	imageToFileFormats.insert({ "image", ".gt(image).png" });
+	imageToFileFormats.insert({ "image(prediction)", ".pred(image).png" });
+
 	selectNumber = 0;
 	imageCount = -1;
 }
@@ -26,8 +30,11 @@ void System::InputVariables()
 	std::cin >> imageCount;
 	ImageDataInitialize(imageCount);
 
-	std::cout << "비교할 두 이미지를 선택하시오(ground_truth, image, prediction_image): ";
-	std::cin >> imageForCompare1 >> imageForCompare2;
+	if (modelName == "resources")
+	{
+		std::cout << "비교할 두 이미지를 선택하시오(ground_truth, image, prediction_image): ";
+		std::cin >> imageForCompare1 >> imageForCompare2;
+	}
 
 	std::cout << "무엇을 할까요?\n";
 	std::cout << "1. RMSE calculate\n";
@@ -40,16 +47,12 @@ void System::Select()
 	switch (selectNumber)
 	{
 	case 1:
-		CreateErrorDirectory();
 		RMSECalculate();
 		break;
 	case 2:
-		
-		CreateErrorDirectory();
 		PrintPixelColorAndDiffernceInTextFile();
 		break;
 	case 3:
-		CreateCompareDirectory();
 		CreateDiffernceImage();
 		break;
 	default:
@@ -64,9 +67,17 @@ void System::RMSECalculate()
 {
 	std::stringstream errorFile; // error 텍스트 파일명
 
-	errorFile << "./errors/" << modelName << "(RMSE," << imageForCompare1 << "_vs_" << imageForCompare2 << ").txt";
-	TextFileInitialize(errorFile.str().c_str());
-
+	if (modelName == "resources")
+	{
+		errorFile << "./errors/(RMSE," << imageForCompare1 << "_vs_" << imageForCompare2 << ").txt";
+		TextFileInitialize(errorFile.str().c_str());
+	}
+	else
+	{
+		errorFile << "./errors/" << modelName << "/" << modelName << ".txt";
+		TextFileInitialize(errorFile.str().c_str());
+	}
+	
 	CalculateDirectionalLight();
 }
 void System::PrintPixelColorAndDiffernceInTextFile()
@@ -77,8 +88,16 @@ void System::PrintPixelColorAndDiffernceInTextFile()
 	std::cout << "Choose Image Number: ";
 	std::cin >> imageNumber;
 
-	errorFile << "./errors/" << modelName << "(PixelColor," << imageNumber << imageForCompare1 << "_vs_" << imageForCompare2 << ").txt";
-	TextFileInitialize(errorFile.str().c_str());
+	if (modelName == "resources")
+	{
+		errorFile << "./errors/" << modelName << "(PixelColor," << imageNumber << imageForCompare1 << "_vs_" << imageForCompare2 << ").txt";
+		TextFileInitialize(errorFile.str().c_str());
+	}
+	else
+	{
+		errorFile << "./errors/" << modelName << "(" << imageNumber << ", PixelColor).txt";
+		TextFileInitialize(errorFile.str().c_str());
+	}
 
 	DiffernceCalculate(imageNumber);
 }
@@ -86,53 +105,6 @@ void System::CreateDiffernceImage()
 {
 	Compare(150);
 }
-
-
-void System::CreateErrorDirectory()
-{
-	std::string errorDirectory = "./errors";
-
-	if (!std::filesystem::exists(errorDirectory))
-	{
-		try
-		{
-			std::filesystem::create_directory(errorDirectory); // throws: create directories failed
-		}
-		catch (std::filesystem::filesystem_error const& ex)
-		{
-			std::cout
-				<< "what():  " << ex.what() << '\n'
-				<< "path1(): " << ex.path1() << '\n'
-				<< "path2(): " << ex.path2() << '\n'
-				<< "code().value():    " << ex.code().value() << '\n'
-				<< "code().message():  " << ex.code().message() << '\n'
-				<< "code().category(): " << ex.code().category().name() << '\n';
-		}
-	}
-}
-void System::CreateCompareDirectory()
-{
-	std::string compareDirectory = "./compare";
-
-	if (!std::filesystem::exists(compareDirectory))
-	{
-		try
-		{
-			std::filesystem::create_directory(compareDirectory); // throws: create directories failed
-		}
-		catch (std::filesystem::filesystem_error const& ex)
-		{
-			std::cout
-				<< "what():  " << ex.what() << '\n'
-				<< "path1(): " << ex.path1() << '\n'
-				<< "path2(): " << ex.path2() << '\n'
-				<< "code().value():    " << ex.code().value() << '\n'
-				<< "code().message():  " << ex.code().message() << '\n'
-				<< "code().category(): " << ex.code().category().name() << '\n';
-		}
-	}
-}
-
 
 void System::TextFileInitialize(const char* fileName)
 {
@@ -143,17 +115,28 @@ void System::ImageDataInitialize(int imageSize)
 {
 	sources.reserve(imageSize);
 	destinations.reserve(imageSize);
-	/*
-	이미지 불러오기
-	이미지 형식이 다를 경우 코드 변경 필요
-	*/
+
+	// 이미지 불러오기
+	// 이미지 형식이 다를 경우 코드 변경 필요
 	// 영현님께서 보내신 model과 내가 그린 image 파일 각각 불러오기
-	for (int i = 0; i < imageSize; ++i)
+
+	if (modelName == "resources")
 	{
-		sources.push_back({ "resources/ground_truth/" + std::to_string(i + 1) + ".input.png" });
-		destinations.push_back({ "resources/image(prediction)/" + std::to_string(i + 1) + ".pred(image).png" });
+		for (int i = 0; i < imageSize; ++i)
+		{
+			sources.push_back({modelName + "/" + imageForCompare1 + "/" + std::to_string(i + 1) + imageToFileFormats[imageForCompare1] });
+			destinations.push_back({modelName + "/" + imageForCompare2 + "/" + std::to_string(i + 1) + imageToFileFormats[imageForCompare2] });
+		}
 	}
 
+	else
+	{
+		for (int i = 0; i < imageSize; ++i)
+		{
+			sources.push_back({ "sources/" + modelName + "/illumination/i_output_" + std::to_string(i) + ".png" });
+			destinations.push_back({ "sources/" + modelName + "/image/i_output_" + std::to_string(i) + ".png" });
+		}
+	}
 
 	if (sources.size() != imageSize && destinations.size() != imageSize)
 	{

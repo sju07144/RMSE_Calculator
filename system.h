@@ -41,13 +41,12 @@ private:
 	std::vector<Image> destinations;
 	std::vector<EuclideanCalculator> euclideanCalculators;
 
+	std::map<std::string, std::string> imageToFileFormats; // 이미지의 종류와 그에 맞는 파일 형식 매핑
+
 	TextPrinter textPrinter;
 
 	void InputVariables();
 	void Select();
-
-	void CreateErrorDirectory();
-	void CreateCompareDirectory();
 
 	void RMSECalculate(); // 픽셀마다 rmse 계산
 	void PrintPixelColorAndDiffernceInTextFile(); // error가 존재하는 pixel의 좌표값 조사
