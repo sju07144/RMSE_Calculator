@@ -208,9 +208,19 @@ void System::Compare(int scale)
 				}
 			}
 		}
-		writePath << "resources/compare/" << imageForCompare1 << "_vs_" << imageForCompare2 << imageIndex + 1 << ".("
-			<< imageForCompare1 << "_vs_" << imageForCompare2 << ").png";
+
+		if (modelName == "resources")
+		{
+			writePath << "resources/compare/" << imageForCompare1 << "_vs_" << imageForCompare2 << imageIndex + 1 << ".("
+				<< imageForCompare1 << "_vs_" << imageForCompare2 << ").png";
+		}
+		else
+		{
+			writePath << "sources/" << modelName << "/compare/c_output_" << std::to_string(imageIndex) << ".png";
+		}
+		
 		results.WriteImage(writePath.str());
+		writePath.str("");
 	}
 }
 void System::DiffernceCalculate(int i)
